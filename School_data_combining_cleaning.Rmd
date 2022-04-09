@@ -1,0 +1,195 @@
+---
+title: "T2S_combined_datasets"
+author: "Umar"
+date: "9/10/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r}
+rm(list=ls())
+
+setwd("/Users/umarshehzad/Desktop/PhD Stuff/semesters/Fall 2021/SEM 7760/dataset/Cleaning")
+
+library(tidyverse)
+library(psych)
+library(readxl)
+library(furniture)
+library(plyr)
+library(mice)
+
+```
+
+```{r}
+Summit_pre<-rio::import("Summit_Cleaned_pre.csv")
+Summit_post<-rio::import("Summit_Cleaned_post.csv")
+
+rownames(Summit_pre)<-Summit_pre$Username
+rownames(Summit_post)<-Summit_post$Username
+Summit <- merge(Summit_pre, Summit_post, by=0, all=TRUE)
+Summit<-Summit[,c(1,2,41,3:40, 42:89)]
+
+Summit <- Summit %>%
+  mutate(Teacher = rep (c("Debra", "Deana", "Don"), times= c(32, length(33:64), length(65:96)))) %>% #Filling in the teacher name where values were missing
+  mutate(Username = Row.names)
+
+```
+
+```{r}
+
+BC<-rio::import("T2S_BC2_Corrected1.csv")
+BC<-BC[1:74,]
+```
+
+```{r}
+BC_sub <- subset(BC, select=c("Username","Teacher","Gender","Age","UseScratch","MakeScratch","OtherApp","FinishGame","TakeHome","FS1_pre","FS1_post","FS2_pre","FS2_post","FS3_pre","FS3_post","FS4_pre","FS4_post","SEF1_pre","SEF1_post","SEF2_pre","SEF2_post","SEF3_pre","SEF3_post","SEF4_pre","SEF4_post","II2_pre","II2_post","II3_R_pre","II3_R_post","II4_pre","II4_post","SEN1_pre","SEN1_post","SEN2_pre","SEN2_post","SEN3_pre","SEN3_post","MS1_pre","MS1_post","MS2_pre","MS2_post","MS3_pre","MS3_post","MS4_pre","MS4_post"))
+
+colnames(BC_sub)<-c("Username","Teacher","Gender","Age","UseScratch","MakeScratch","OtherApp","FinishGame","TakeHome","FS1_pre","FS1_post","FS2_pre","FS2_post","FS3_pre","FS3_post","FS4_R_pre","FS4_R_post","SEF1_pre","SEF1_post","SEF2_pre","SEF2_post","SEF3_pre","SEF3_post","SEF4_pre","SEF4_post","II2_pre","II2_post","II3_R_pre","II3_R_post","II4_pre","II4_post","SEN1_pre","SEN1_post","SEN2_pre","SEN2_post","SEN3_pre","SEN3_post","MS1_pre","MS1_post","MS2_pre","MS2_post","MS3_R_pre","MS3_R_post","MS4_pre","MS4_post")
+
+BC_sub <- BC_sub %>%
+  mutate(school = rep ("BC", each=length(BC_sub$Teacher)))
+
+
+Summit_sub <- subset(Summit, select=c("Username","Teacher","Gender","Age","UseScratch","MakeScratch","OtherApp","FinishGame","BoardHome","FS1_pre","FS1_post","FS2_pre","FS2_post","FS3_pre","FS3_post","FS4_R_pre","FS4_R_post","SEF1_pre","SEF1_post","SEF2_pre","SEF2_post","SEF3_pre","SEF3_post","SEF4_pre","SEF4_post","II2_pre","II2_post","II3_R_pre","II3_R_post","II4_pre","II4_post","SEN1_pre","SEN1_post","SEN2_pre","SEN2_post","SEN3_pre","SEN3_post","MS1_pre","MS1_post","MS2_pre","MS2_post","MS3_R_pre","MS3_R_post","MS4_pre","MS4_post"))
+
+Summit_sub <- Summit_sub %>%
+  mutate(school = rep ("Summit", each=length(Summit_sub$Teacher)))
+
+Summit_sub[which(Summit_sub$MS3_R_pre==6),42]<-1
+Summit_sub[which(Summit_sub$MS3_R_pre==5),42]<-2
+Summit_sub[which(Summit_sub$MS3_R_pre==4),42]<-3
+Summit_sub[which(Summit_sub$MS3_R_pre==3),42]<-4
+Summit_sub[which(Summit_sub$MS3_R_pre==2),42]<-5
+Summit_sub[which(Summit_sub$MS3_R_pre==1),42]<-6
+
+Summit_sub[which(Summit_sub$MS3_R_post==6),43]<-1
+Summit_sub[which(Summit_sub$MS3_R_post==5),43]<-2
+Summit_sub[which(Summit_sub$MS3_R_post==4),43]<-3
+Summit_sub[which(Summit_sub$MS3_R_post==3),43]<-4
+Summit_sub[which(Summit_sub$MS3_R_post==2),43]<-5
+Summit_sub[which(Summit_sub$MS3_R_post==1),43]<-6
+
+Summit_sub[which(Summit_sub$FS4_R_pre==6),16]<-1
+Summit_sub[which(Summit_sub$FS4_R_pre==5),16]<-2
+Summit_sub[which(Summit_sub$FS4_R_pre==4),16]<-3
+Summit_sub[which(Summit_sub$FS4_R_pre==3),16]<-4
+Summit_sub[which(Summit_sub$FS4_R_pre==2),16]<-5
+Summit_sub[which(Summit_sub$FS4_R_pre==1),16]<-6
+
+Summit_sub[which(Summit_sub$FS4_R_post==6),17]<-1
+Summit_sub[which(Summit_sub$FS4_R_post==5),17]<-2
+Summit_sub[which(Summit_sub$FS4_R_post==4),17]<-3
+Summit_sub[which(Summit_sub$FS4_R_post==3),17]<-4
+Summit_sub[which(Summit_sub$FS4_R_post==2),17]<-5
+Summit_sub[which(Summit_sub$FS4_R_post==1),17]<-6
+
+
+
+colnames(Summit_sub) <- colnames(BC_sub)
+
+T2S_Data<-rbind.data.frame(BC_sub, Summit_sub)
+
+T2S_Data<-T2S_Data[,c(46,1:45)]
+
+```
+
+```{r}
+all_data<- T2S_Data %>%
+  mutate(Teacher = as.factor(Teacher)) %>%
+  mutate (Teacher = revalue(Teacher, c("Danielle"="Lillith","Deana"="Marice", "Debra" = "Daphnie", "Don"="Marty","Megan"="Roz","Tamara"="Sherry" ))) %>%
+  mutate(school = as.factor(school)) %>%
+  mutate (school = revalue(school, c("BC"="River","Summit"="Mountain")))
+anon_data<-all_data
+
+anon_data[1:24,]<-all_data %>%
+subset(Teacher == "Lillith") %>%
+  mutate(Username=paste("L_student", sep = "_",01:length(Teacher)))
+
+anon_data[25:(24+32),]<-all_data %>%
+  subset(Teacher == "Marice") %>%
+  mutate(Username=paste("M_student", sep = "_",01:length(Teacher)))
+
+anon_data[(24+32+1):(24+32+32),]<-all_data %>%
+  subset(Teacher == "Daphnie") %>%
+  mutate(Username=paste("D_student", sep = "_",01:length(Teacher)))
+
+anon_data[(24+32+32+1):(24+32+32+32),]<-all_data %>%
+  subset(Teacher == "Marty") %>%
+  mutate(Username=paste("T_student", sep = "_",01:length(Teacher)))
+
+anon_data[(24+32+32+32+1):(24+32+32+32+25),]<-all_data %>%
+  subset(Teacher == "Roz") %>%
+  mutate(Username=paste("R_student", sep = "_",01:length(Teacher)))
+
+anon_data[(24+32+32+32+25+1):(24+32+32+32+25+25),]<-all_data %>%
+  subset(Teacher == "Sherry") %>%
+  mutate(Username=paste("S_student", sep = "_",01:length(Teacher)))
+
+```
+
+#impute data
+
+```{r}
+#impute_anon_data<-mice(anon_data, m = 10, maxit = 50, seed = 500, method = "pmm", remove_collinear = FALSE)
+#anon_data <- as.data.frame(complete(impute_anon_data,1))
+
+```
+
+```{r}
+DS<-anon_data
+FS_pre<- rowmeans(DS[,c("FS1_pre", "FS2_pre", "FS3_pre", "FS4_R_pre")])
+
+FS_post<- rowmeans(DS[,c("FS1_post", "FS2_post", "FS3_post", "FS4_R_post")])
+
+SEF_pre<- rowmeans(DS[,c("SEF1_pre", "SEF2_pre", "SEF3_pre", "SEF4_pre")])
+
+SEF_post<- rowmeans(DS[,c("SEF1_post", "SEF2_post", "SEF3_post", "SEF4_post")])
+
+II_pre<- rowmeans(DS[,c("II2_pre", "II3_R_pre", "II4_pre")])
+
+II_post<- rowmeans(DS[,c("II2_post", "II3_R_post", "II4_post")])
+
+SEN_pre<- rowmeans(DS[,c("SEN1_pre", "SEN2_pre", "SEN3_pre")])
+
+SEN_post<- rowmeans(DS[,c("SEN1_post", "SEN2_post", "SEN3_post")])
+
+MS_pre<- rowmeans(DS[,c("MS1_pre", "MS2_pre", "MS3_R_pre", "MS4_pre")])
+
+MS_post<- rowmeans(DS[,c("MS1_post", "MS2_post", "MS3_R_post", "MS4_post")])
+
+DS_comp<-cbind.data.frame(DS[, c(1:10)], FS_pre, FS_post, SEF_pre, SEF_post, II_pre, II_post, SEN_pre, SEN_post, MS_pre, MS_post)
+DS<-cbind.data.frame(DS, FS_pre, FS_post, SEF_pre, SEF_post, II_pre, II_post, SEN_pre, SEN_post, MS_pre, MS_post)
+```
+
+# Descriptive column names
+
+```{r}
+#DSN<-rio::import("T2S_complete_data.csv") #in case imputed data is required
+DSN<-DS # in case non imputed data is needed with composite scores
+#DSN<-anon_data #in case non imputed data is needed without composite scores
+colnames(DSN)
+desc_names<-as.vector(read.csv("csv names.csv", header = FALSE))
+ds_names<-desc_names$V1
+rm(desc_names)
+desc_names<-c(rbind(ds_names, ds_names))
+pre_post<-rep(c("_pre", "_post"), times =18)
+desc_names<-paste(desc_names,pre_post, sep = "")
+desc_names<-c(colnames(DSN[,c(1:10)]), desc_names, colnames(DSN[,c(47:56)]))
+colnames(DSN)<-desc_names
+
+
+#rio::export(DSN, "T2S_complete_data_names.csv")
+rio::export(DSN, "T2S_complete_unimputed.csv") #Unimputed data
+```
+
+
+```{r}
+rio::export(DS, "T2S_complete_data.csv")
+rio::export(DS_comp, "T2S_comp_means.csv")
+
+```
