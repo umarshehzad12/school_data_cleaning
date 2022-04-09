@@ -107,9 +107,15 @@ School1_sub <- School1_sub %>%
 
 ```{r}
 
-BC_sub <- subset(BC, select=c("Username","Teacher","Gender","Age","UseScratch","MakeScratch","OtherApp","FinishGame","TakeHome","FS1_pre","FS1_post","FS2_pre","FS2_post","FS3_pre","FS3_post","FS4_pre","FS4_post","SEF1_pre","SEF1_post","SEF2_pre","SEF2_post","SEF3_pre","SEF3_post","SEF4_pre","SEF4_post","II2_pre","II2_post","II3_R_pre","II3_R_post","II4_pre","II4_post","SEN1_pre","SEN1_post","SEN2_pre","SEN2_post","SEN3_pre","SEN3_post","MS1_pre","MS1_post","MS2_pre","MS2_post","MS3_pre","MS3_post","MS4_pre","MS4_post"))
+BC_sub <- subset(BC, select=c("Username","Teacher","Gender","Age","UseScratch","MakeScratch","OtherApp","FinishGame","TakeHome","FS1_pre","FS1_post","FS2_pre","FS2_post"
+,"FS3_pre","FS3_post","FS4_pre","FS4_post","SEF1_pre","SEF1_post","SEF2_pre","SEF2_post","SEF3_pre","SEF3_post","SEF4_pre","SEF4_post","II2_pre"
+,"II2_post","II3_R_pre","II3_R_post","II4_pre","II4_post","SEN1_pre","SEN1_post","SEN2_pre","SEN2_post","SEN3_pre","SEN3_post","MS1_pre"
+,"MS1_post","MS2_pre","MS2_post","MS3_pre","MS3_post","MS4_pre","MS4_post"))
 
-colnames(BC_sub)<-c("Username","Teacher","Gender","Age","UseScratch","MakeScratch","OtherApp","FinishGame","TakeHome","FS1_pre","FS1_post","FS2_pre","FS2_post","FS3_pre","FS3_post","FS4_R_pre","FS4_R_post","SEF1_pre","SEF1_post","SEF2_pre","SEF2_post","SEF3_pre","SEF3_post","SEF4_pre","SEF4_post","II2_pre","II2_post","II3_R_pre","II3_R_post","II4_pre","II4_post","SEN1_pre","SEN1_post","SEN2_pre","SEN2_post","SEN3_pre","SEN3_post","MS1_pre","MS1_post","MS2_pre","MS2_post","MS3_R_pre","MS3_R_post","MS4_pre","MS4_post")
+colnames(BC_sub)<-c("Username","Teacher","Gender","Age","UseScratch","MakeScratch","OtherApp","FinishGame","TakeHome","FS1_pre","FS1_post","FS2_pre","FS2_post"
+,"FS3_pre","FS3_post","FS4_R_pre","FS4_R_post","SEF1_pre","SEF1_post","SEF2_pre","SEF2_post","SEF3_pre","SEF3_post","SEF4_pre","SEF4_post","II2_pre"
+,"II2_post","II3_R_pre","II3_R_post","II4_pre","II4_post","SEN1_pre","SEN1_post","SEN2_pre","SEN2_post","SEN3_pre","SEN3_post","MS1_pre","MS1_post"
+,"MS2_pre","MS2_post","MS3_R_pre","MS3_R_post","MS4_pre","MS4_post")
 
 ```
 
@@ -129,7 +135,8 @@ Cmbnd_Data<-Cmbnd_Data[,c(46,1:45)]
 ```{r}
 all_data<- Cmbnd_Data %>%
   mutate(Teacher = as.factor(Teacher)) %>%
-  mutate (Teacher = revalue(Teacher, c("joy"="Lillith","Michelle"="Marice", "Lauren" = "Daphnie", "Michael"="Marty","Susan"="Roz","Margaret"="Sherry" ))) %>%
+  mutate (Teacher = revalue(Teacher, c("joy"="Lillith","Michelle"="Marice", "Lauren" = "Daphnie", "Michael"="Marty","Susan"="Roz",
+  "Margaret"="Sherry" ))) %>%
   mutate(school = as.factor(school)) %>%
   mutate (school = revalue(school, c("BC"="River","School1"="Mountain")))
 anon_data<-all_data
