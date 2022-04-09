@@ -1,0 +1,223 @@
+---
+title: "Cleaning of classroom data from two schools"
+author: "Umar"
+date: "9/10/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Setting directory and loading libraries
+
+```{r}
+rm(list=ls()) #I start most of my R markdowns with this to clear R's global environments. That way I don't have to worry about data saved by the previously run programs
+
+setwd("/Users/umarshehzad/dataset/Cleaning") # This is the full path to the folder where my csv files are saved
+
+#The following libraries were used
+library(tidyverse)
+library(psych)
+library(readxl)
+library(furniture)
+library(plyr)
+library(mice)
+
+```
+
+## Merging data from pre-survey and post-survey by rown into one dataframe
+
+```{r}
+School1_pre<-rio::import("School_1_pre.csv") # Data from school 1 was saved in two files, this one from pre-survey results
+School1_post<-rio::import("School_1_post.csv") #This one from post-survey results
+
+rownames(School1_pre)<-School1_pre$Username #The usernames are stored in the first column, these are assigned as row names to the data set
+rownames(School1_post)<-School1_post$Username
+School1 <- merge(School1_pre, School1_post, by=0, all=TRUE) #The pre and post datasets are merged by row names
+School1<-School1[,c(1,2,41,3:40, 42:89)] #A subset of dataset is selected
+
+School1 <- School1 %>%
+  mutate(Teacher = rep (c("Lauren", "Michelle", "Michae"), times= c(32, length(33:64), length(65:96)))) %>% #Filling in the teacher name where values were missing
+  mutate(Username = Row.names) 
+
+```
+
+## Importing data from another school in a dataframe
+
+```{r}
+
+BC<-rio::import("school2.csv") #I had previously combined pre and post data for school 2 similar to the steps shown above
+BC<-BC[1:74,] #This is done to remove any garbage data stored in the csv beyond the last student value in the row number 74
+```
+
+
+## Further subsetting of data from school 1
+
+```{r}
+School1_sub <- subset(School1, select=c("Username","Teacher","Gender","Age","UseScratch","MakeScratch","OtherApp","FinishGame","BoardHome","FS1_pre","FS1_post","FS2_pre","FS2_post","FS3_pre","FS3_post","FS4_R_pre","FS4_R_post","SEF1_pre","SEF1_post","SEF2_pre","SEF2_post","SEF3_pre","SEF3_post","SEF4_pre","SEF4_post","II2_pre","II2_post","II3_R_pre","II3_R_post","II4_pre","II4_post","SEN1_pre","SEN1_post","SEN2_pre","SEN2_post","SEN3_pre","SEN3_post","MS1_pre","MS1_post","MS2_pre","MS2_post","MS3_R_pre","MS3_R_post","MS4_pre","MS4_post"))
+```
+
+## Reversing the scores in the reversed survey items
+```{r}
+# The value 1 is replaced by 6, 2 by 5, and so on.
+
+School1_sub[which(School1_sub$MS3_R_pre==6),42]<-1 
+School1_sub[which(School1_sub$MS3_R_pre==5),42]<-2
+School1_sub[which(School1_sub$MS3_R_pre==4),42]<-3
+School1_sub[which(School1_sub$MS3_R_pre==3),42]<-4
+School1_sub[which(School1_sub$MS3_R_pre==2),42]<-5
+School1_sub[which(School1_sub$MS3_R_pre==1),42]<-6
+
+School1_sub[which(School1_sub$MS3_R_post==6),43]<-1
+School1_sub[which(School1_sub$MS3_R_post==5),43]<-2
+School1_sub[which(School1_sub$MS3_R_post==4),43]<-3
+School1_sub[which(School1_sub$MS3_R_post==3),43]<-4
+School1_sub[which(School1_sub$MS3_R_post==2),43]<-5
+School1_sub[which(School1_sub$MS3_R_post==1),43]<-6
+
+School1_sub[which(School1_sub$FS4_R_pre==6),16]<-1
+School1_sub[which(School1_sub$FS4_R_pre==5),16]<-2
+School1_sub[which(School1_sub$FS4_R_pre==4),16]<-3
+School1_sub[which(School1_sub$FS4_R_pre==3),16]<-4
+School1_sub[which(School1_sub$FS4_R_pre==2),16]<-5
+School1_sub[which(School1_sub$FS4_R_pre==1),16]<-6
+
+School1_sub[which(School1_sub$FS4_R_post==6),17]<-1
+School1_sub[which(School1_sub$FS4_R_post==5),17]<-2
+School1_sub[which(School1_sub$FS4_R_post==4),17]<-3
+School1_sub[which(School1_sub$FS4_R_post==3),17]<-4
+School1_sub[which(School1_sub$FS4_R_post==2),17]<-5
+School1_sub[which(School1_sub$FS4_R_post==1),17]<-6
+```
+
+## Creating a new column that indicates school names
+
+```{r}
+
+BC_sub <- BC_sub %>%
+  mutate(school = rep ("BC", each=length(BC_sub$Teacher)))
+
+School1_sub <- School1_sub %>%
+  mutate(school = rep ("School1", each=length(School1_sub$Teacher)))
+```
+
+
+## Selecting a subset and renaming columns with reversed values
+
+```{r}
+
+BC_sub <- subset(BC, select=c("Username","Teacher","Gender","Age","UseScratch","MakeScratch","OtherApp","FinishGame","TakeHome","FS1_pre","FS1_post","FS2_pre","FS2_post","FS3_pre","FS3_post","FS4_pre","FS4_post","SEF1_pre","SEF1_post","SEF2_pre","SEF2_post","SEF3_pre","SEF3_post","SEF4_pre","SEF4_post","II2_pre","II2_post","II3_R_pre","II3_R_post","II4_pre","II4_post","SEN1_pre","SEN1_post","SEN2_pre","SEN2_post","SEN3_pre","SEN3_post","MS1_pre","MS1_post","MS2_pre","MS2_post","MS3_pre","MS3_post","MS4_pre","MS4_post"))
+
+colnames(BC_sub)<-c("Username","Teacher","Gender","Age","UseScratch","MakeScratch","OtherApp","FinishGame","TakeHome","FS1_pre","FS1_post","FS2_pre","FS2_post","FS3_pre","FS3_post","FS4_R_pre","FS4_R_post","SEF1_pre","SEF1_post","SEF2_pre","SEF2_post","SEF3_pre","SEF3_post","SEF4_pre","SEF4_post","II2_pre","II2_post","II3_R_pre","II3_R_post","II4_pre","II4_post","SEN1_pre","SEN1_post","SEN2_pre","SEN2_post","SEN3_pre","SEN3_post","MS1_pre","MS1_post","MS2_pre","MS2_post","MS3_R_pre","MS3_R_post","MS4_pre","MS4_post")
+
+```
+
+## Data from two schools are merged into one dataframe
+
+```{r}
+colnames(School1_sub) <- colnames(BC_sub)
+
+Cmbnd_Data<-rbind.data.frame(BC_sub, School1_sub)
+
+Cmbnd_Data<-Cmbnd_Data[,c(46,1:45)]
+
+```
+
+##Anonymizing Teacher names and change student IDs to indicate their teacher
+
+```{r}
+all_data<- Cmbnd_Data %>%
+  mutate(Teacher = as.factor(Teacher)) %>%
+  mutate (Teacher = revalue(Teacher, c("joy"="Lillith","Michelle"="Marice", "Lauren" = "Daphnie", "Michael"="Marty","Susan"="Roz","Margaret"="Sherry" ))) %>%
+  mutate(school = as.factor(school)) %>%
+  mutate (school = revalue(school, c("BC"="River","School1"="Mountain")))
+anon_data<-all_data
+
+anon_data[1:24,]<-all_data %>%
+subset(Teacher == "Lillith") %>%
+  mutate(Username=paste("L_student", sep = "_",01:length(Teacher)))
+
+anon_data[25:(24+32),]<-all_data %>%
+  subset(Teacher == "Marice") %>%
+  mutate(Username=paste("M_student", sep = "_",01:length(Teacher)))
+
+anon_data[(24+32+1):(24+32+32),]<-all_data %>%
+  subset(Teacher == "Daphnie") %>%
+  mutate(Username=paste("D_student", sep = "_",01:length(Teacher)))
+
+anon_data[(24+32+32+1):(24+32+32+32),]<-all_data %>%
+  subset(Teacher == "Marty") %>%
+  mutate(Username=paste("T_student", sep = "_",01:length(Teacher)))
+
+anon_data[(24+32+32+32+1):(24+32+32+32+25),]<-all_data %>%
+  subset(Teacher == "Roz") %>%
+  mutate(Username=paste("R_student", sep = "_",01:length(Teacher)))
+
+anon_data[(24+32+32+32+25+1):(24+32+32+32+25+25),]<-all_data %>%
+  subset(Teacher == "Sherry") %>%
+  mutate(Username=paste("S_student", sep = "_",01:length(Teacher)))
+
+```
+
+## impute data. 
+### This was not done in favor of keeping the missingness and dealing with it differently for each analysis
+
+```{r}
+#impute_anon_data<-mice(anon_data, m = 10, maxit = 50, seed = 500, method = "pmm", remove_collinear = FALSE)
+#anon_data <- as.data.frame(complete(impute_anon_data,1))
+
+```
+
+## Composite means.
+### Using composite means is not recommended in most cases but it can reduce dimensionso f the data and make it easier to compare different constructs based on their means
+
+
+```{r}
+DS<-anon_data
+FS_pre<- rowmeans(DS[,c("FS1_pre", "FS2_pre", "FS3_pre", "FS4_R_pre")])
+
+FS_post<- rowmeans(DS[,c("FS1_post", "FS2_post", "FS3_post", "FS4_R_post")])
+
+SEF_pre<- rowmeans(DS[,c("SEF1_pre", "SEF2_pre", "SEF3_pre", "SEF4_pre")])
+
+SEF_post<- rowmeans(DS[,c("SEF1_post", "SEF2_post", "SEF3_post", "SEF4_post")])
+
+II_pre<- rowmeans(DS[,c("II2_pre", "II3_R_pre", "II4_pre")])
+
+II_post<- rowmeans(DS[,c("II2_post", "II3_R_post", "II4_post")])
+
+SEN_pre<- rowmeans(DS[,c("SEN1_pre", "SEN2_pre", "SEN3_pre")])
+
+SEN_post<- rowmeans(DS[,c("SEN1_post", "SEN2_post", "SEN3_post")])
+
+MS_pre<- rowmeans(DS[,c("MS1_pre", "MS2_pre", "MS3_R_pre", "MS4_pre")])
+
+MS_post<- rowmeans(DS[,c("MS1_post", "MS2_post", "MS3_R_post", "MS4_post")])
+
+DS_comp<-cbind.data.frame(DS[, c(1:10)], FS_pre, FS_post, SEF_pre, SEF_post, II_pre, II_post, SEN_pre, SEN_post, MS_pre, MS_post)
+DS<-cbind.data.frame(DS, FS_pre, FS_post, SEF_pre, SEF_post, II_pre, II_post, SEN_pre, SEN_post, MS_pre, MS_post)
+```
+
+## Descriptive column names
+### csv names.csv contains column names that are more descriptive than the current ones
+
+```{r}
+#DSN<-rio::import("T2S_complete_data.csv") #in case imputed data is required
+DSN<-DS # in case non imputed data is needed with composite scores
+#DSN<-anon_data #in case non imputed data is needed without composite scores
+colnames(DSN)
+desc_names<-as.vector(read.csv("csv names.csv", header = FALSE))
+ds_names<-desc_names$V1
+rm(desc_names)
+# The following three  lines add "_pre" or "_post" to column names to distinguish between pre and post measures
+desc_names<-c(rbind(ds_names, ds_names))
+pre_post<-rep(c("_pre", "_post"), times =18) 
+desc_names<-paste(desc_names,pre_post, sep = "")
+desc_names<-c(colnames(DSN[,c(1:10)]), desc_names, colnames(DSN[,c(47:56)]))
+colnames(DSN)<-desc_names
+
+
+#rio::export(DSN, "T2S_complete_data_names.csv")
+rio::export(DSN, "T2S_complete_unimputed.csv") #Unimputed data
+```
